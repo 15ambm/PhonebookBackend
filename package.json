@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build:ui" : "rm -rf build && cd 'C:/Users/Alex/Documents/repo/FullStackOpen/Part 2/phonebook' && npm run build --prod && cp -r build C:/Users/Alex/Documents/repo/PhonebookBackend",
+    "deploy" : "git push heroku master",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"

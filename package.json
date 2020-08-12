@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:ui" : "rm -rf build && cd 'C:/Users/Alex/Documents/repo/FullStackOpen/Part 2/phonebook' && npm run build --prod && cp -r build C:/Users/Alex/Documents/repo/PhonebookBackend",
-    "deploy" : "git push heroku master",
-    "deploy:full" : "npm run build:ui && git add . && git commit -m 'newbuild' && npm run deploy",
+    "build:ui": "rm -rf build && cd 'C:/Users/Alex/Documents/repo/FullStackOpen/Part 2/phonebook' && npm run build --prod && cp -r build C:/Users/Alex/Documents/repo/PhonebookBackend",
+    "deploy": "git push heroku master",
+    "deploy:full": "npm run build:ui && git add . && git commit -m 'newbuild' && npm run deploy",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,6 +24,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "mongoose": "^5.9.28",
     "morgan": "^1.10.0"
   },
   "devDependencies": {

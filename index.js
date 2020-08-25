@@ -30,44 +30,54 @@ app.use(morgan((tokens, req, res) => {
 }))
 app.use(express.static('build'))
 
-let persons =
- [
-    { name: 'Arto Hellas', number: '040-123456' , id:1},
-    { name: 'Ada Lovelace', number: '39-44-5323523' ,id:2},
-    { name: 'Dan Abramov', number: '12-43-234345' ,id:3},
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id:4 }
-  ]
+// let persons =
+//  [
+//     { name: 'Arto Hellas', number: '040-123456' , id:1},
+//     { name: 'Ada Lovelace', number: '39-44-5323523' ,id:2},
+//     { name: 'Dan Abramov', number: '12-43-234345' ,id:3},
+//     { name: 'Mary Poppendieck', number: '39-23-6423122', id:4 }
+//   ]
 
-app.get('/api/persons', (req, res) => {
+const errorHandler = (err, req, res, next) => {
+    console.log(err)
+    if(err.name === 'CastError') {
+        return res.status(404).send({error:'bad id'})
+
+    }
+    next(err)
+}
+
+app.get('/api/persons', (req, res, next) => {
     Person.find({}).then(persons => {
         res.json(persons)
     })
+    .catch(err => next(err))
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     const id = req.params.id
     Person.findById(id).then(person => {
         res.json(person)
     })
-
+    .catch(err => next(err))
 })  
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const newPersons = persons.filter(person => person.id !== id)
-    persons = newPersons
-    console.log(persons)
-    res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id
+    Person.findByIdAndRemove(id)
+    .then(result => {
+        res.status(204).end()
+    })
+    .catch(err => next(err))
+
 })
 
 app.get('/info', (req, res) => {
-    res.send(`<p>Phonebook has ${persons.length} people</p>
+    Person.find({}).then(persons => {
+        res.send(`<p>Phonebook has ${persons.length} people</p>
                 <p>${new Date()}</p>`)
+    })  
 })
-
-const generateID = () => {
-    return Math.floor(Math.random() * 100000)
-}
 
 app.post('/api/persons', (req, res) => {
     const body = req.body
@@ -80,12 +90,7 @@ app.post('/api/persons', (req, res) => {
         return res.status(400).json({
             error:'no number field'
         })
-    } else if (persons.find(p => p.name === body.name)) {
-        return res.status(400).json({
-            error:'name must be unique'
-        })
-    }
-
+    } 
     const person = new Person({
         name: body.name,
         number: body.number
@@ -94,11 +99,23 @@ app.post('/api/persons', (req, res) => {
     person.save().then(person => {
         res.json(person)
     })
-
-    //persons = persons.concat(person)
-    //res.json(person)
 })
 
+app.put('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id
+    console.log(req.body)
+    const updatedPerson = {
+        number: req.body.number
+    }
+
+    Person.findByIdAndUpdate(id, updatedPerson, {new:true})
+    .then(updatedPerson => {
+        res.json(updatedPerson)
+    })
+    .catch(err => next(err))
+})
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {

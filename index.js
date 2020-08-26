@@ -42,8 +42,10 @@ const errorHandler = (err, req, res, next) => {
     console.log(err)
     if(err.name === 'CastError') {
         return res.status(404).send({error:'bad id'})
-
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).send({error: err.message})
     }
+
     next(err)
 }
 
@@ -79,18 +81,9 @@ app.get('/info', (req, res) => {
     })  
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const body = req.body
 
-    if (!body.name) {
-        return res.status(400).json({
-            error:'no name field'
-        })
-    } else if (!body.number ) {
-        return res.status(400).json({
-            error:'no number field'
-        })
-    } 
     const person = new Person({
         name: body.name,
         number: body.number
@@ -99,6 +92,7 @@ app.post('/api/persons', (req, res) => {
     person.save().then(person => {
         res.json(person)
     })
+    .catch(err => next(err))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
